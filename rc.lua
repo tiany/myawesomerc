@@ -10,6 +10,8 @@ local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
+-- lain library
+local lain      = require("lain")
 -- for fcitx-chttrans
 table.insert(naughty.config.icon_dirs, '/usr/share/icons/hicolor/48x48/apps/')
 table.insert(naughty.config.icon_dirs, '/usr/share/icons/hicolor/48x48/status/')
@@ -54,8 +56,9 @@ end
 beautiful.init(awful.util.getdir("config") .. "/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "xfce4-terminal"
-editor = "gvim"
+-- terminal = "xfce4-terminal"
+terminal = "gnome-terminal"
+editor = "vim"
 editor_cmd = editor
 
 -- Default modkey.
@@ -166,7 +169,7 @@ end
 
 -- {{{ Tags
 -- Define a tag table which hold all screen tags.
-tags_name = { "1", "2", "3", "4", "5文件", "6聊天", "7GVIM", "8", "9火狐", '0' }
+tags_name = { "1", "2", "3", "4", "5FILE", "6SNS", "7GVIM", "8", "9Chrome", '0' }
 tags_layout = {
     awful.layout.suit.tile,
     awful.layout.suit.tile,
@@ -195,12 +198,12 @@ end
 -- Create a laucher widget and a main menu
 local myawesomemenu = {
    { "编辑配置 (&E)", editor_cmd .. " " .. awesome.conffile },
-   { "重新加载 (&R)", awesome.restart, '/usr/share/icons/gnome/16x16/actions/stock_refresh.png' },
+   { "重新加载 (&R)", awesome.restart},
    { "注销 (&L)", awesome.quit },
 }
 
 local mymenu = {
-   { "&Nautilus", "nautilus --no-desktop /home/lilydjwg/tmpfs", '/usr/share/icons/gnome/32x32/apps/system-file-manager.png' },
+   { "&Nautilus", "nautilus --no-desktop $HOME/tmpfs", '/usr/share/icons/gnome/32x32/apps/system-file-manager.png' },
    { "&Wireshark", "wireshark", '/usr/share/icons/hicolor/32x32/apps/wireshark.png'},
    { "&VirtualBox", "VirtualBox", '/usr/share/icons/hicolor/32x32/mimetypes/virtualbox.png' },
    { "文档查看器 (&E)", "evince", '/usr/share/icons/hicolor/16x16/apps/evince.png' },
@@ -208,13 +211,17 @@ local mymenu = {
 }
 
 mymainmenu = awful.menu({ items = { { "Awesome", myawesomemenu, beautiful.awesome_icon },
-          { "终端 (&T)", terminal, '/usr/share/icons/gnome/32x32/apps/utilities-terminal.png' },
-          { "G&VIM", "gvim", '/usr/share/pixmaps/gvim.png' },
-          { "火狐 (&F)", "firefox", '/usr/share/icons/hicolor/32x32/apps/firefox.png' },
+          -- { "终端 (&T)", terminal, '/usr/share/icons/gnome/32x32/apps/utilities-terminal.png' },
+          { "终端 (&T)", terminal, '/usr/share/icons/HighContrast/32x32/apps/utilities-terminal.png' },
+          -- { "G&VIM", "gvim", '/usr/share/pixmaps/gvim.png' },
+          { "G&VIM", "gvim", '/usr/share/icons/HighContrast/32x32/apps/vim.png' },
+          -- { "火狐 (&F)", "firefox", '/usr/share/icons/hicolor/32x32/apps/firefox.png' },
+          { "Chrom (&C)", "chromium-browser", '/usr/share/icons/hicolor/48x48/apps/chromium-browser.png' },
           { "常用 (&U)", mymenu },
           { "应用程序 (&A)", xdgmenu(terminal) },
           { "挂起 (&S)", "systemctl suspend" },
-          { "关机 (&H)", "zenity --question --title '关机' --text '你确定关机吗？' --default-cancel && systemctl poweroff", '/usr/share/icons/gnome/16x16/actions/gtk-quit.png' },
+          -- { "关机 (&H)", "zenity --question --title '关机' --text '你确定关机吗？' --default-cancel && systemctl poweroff", '/usr/share/icons/hicolor/32x32/actions/system-restart.png' },
+          { "关机 (&H)", "zenity --question --title '关机' --text '你确定关机吗？' --default-cancel && systemctl poweroff" },
           }
 })
 
@@ -226,8 +233,9 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- }}}
 
 -- {{{ Wibox
+markup      = lain.util.markup
 -- Create a textclock widget
-mytextclock = awful.widget.textclock(" %Y年%m月%d日 %H:%M:%S %A ", 1)
+mytextclock = awful.widget.textclock(" %Y/%m/%d %H:%M:%S %A ", 1)
 
 -- {{{ my widgets
 -- {{{ Network speed indicator
@@ -275,7 +283,7 @@ function update_netstat()
 end
 netdata = {}
 netwidget = fixwidthtextbox('(net)')
-netwidget.width = 100
+netwidget.width = 64
 netwidget:set_align('center')
 netwidget_clock = timer({ timeout = 2 })
 netwidget_clock:connect_signal("timeout", update_netstat)
@@ -284,6 +292,7 @@ update_netstat()
 -- }}}
 
 -- {{{ memory usage indicator
+memicon = wibox.widget.imagebox(beautiful.widget_mem)
 function update_memwidget()
     local meminfo = get_memory_usage()
     local free
@@ -295,10 +304,10 @@ function update_memwidget()
     end
     local total = meminfo.MemTotal
     local percent = 100 - math.floor(free / total * 100 + 0.5)
-    memwidget:set_markup('Mem <span color="#90ee90">'.. percent ..'%</span>')
+    memwidget:set_markup(' <span color="#90ee90">'.. percent ..'%</span>')
 end
-memwidget = fixwidthtextbox('Mem ??')
-memwidget.width = 55
+memwidget = fixwidthtextbox(' ??')
+memwidget.width = 32
 update_memwidget()
 mem_clock = timer({ timeout = 5 })
 mem_clock:connect_signal("timeout", update_memwidget)
@@ -332,94 +341,111 @@ cputemp_clock = timer({ timeout = 5 })
 cputemp_clock:connect_signal("timeout", update_cputemp)
 cputemp_clock:start()
 -- }}}
-
---{{{ battery indicator, using the acpi command
-local battery_state = {
-    -- Unknown     = '<span color="yellow">? ',
-    Unknown     = '<span color="#0000ff">↯',
-    Idle        = '<span color="#0000ff">↯',
-    Charging    = '<span color="green">+ ',
-    Discharging = '<span color="#1e90ff">– ',
-}
-function update_batwidget()
-    local pipe = io.popen('acpi')
-    if not pipe then
-        batwidget:set_markup('<span color="red">ERR</span>')
-        return
+-- {{{ CPU Usage
+cpuicon = wibox.widget.imagebox()
+cpuicon:set_image(beautiful.widget_cpu)
+cpuwidget = lain.widgets.cpu({
+    settings = function()
+        widget:set_markup(markup("#e33a6e", cpu_now.usage .. "% "))
     end
-
---[[
-Battery 0: Unknown, 97%
-Battery 1: Unknown, 99%
-
-Battery 0: Discharging, 97%, discharging at zero rate - will never fully discharge.
-Battery 1: Unknown, 99%
-
-Battery 0: Discharging, 96%, 02:25:51 remaining
-Battery 1: Unknown, 99%
-]]
-    local bats = {}
-    local max_percent = 0
-    local max_percent_index = 0
-    local index = 0
-    for line in pipe:lines() do
-        index = index + 1
-        local state, percent, rest = line:match('^Battery %d+:%s+([^,]+), ([0-9.]+)%%(.*)')
-        local t
-        if rest ~= '' then
-            t = rest:match('[1-9]*%d:%d+')
-        end
-        if not t then t = '' end
-        percent = tonumber(percent)
-        if percent > max_percent then
-            max_percent = percent
-            max_percent_index = index
-        end
-        table.insert(bats, {state, percent, t})
-    end
-    pipe:close()
-
-    if index == 0 then
-        batwidget:set_markup('<span color="red">ERR</span>')
-        return
-    end
-
-    if max_percent <= 30 then
-        if bats[max_percent_index][1] == 'Discharging' then
-            local t = os.time()
-            if t - last_bat_warning > 60 * 5 then
-                naughty.notify{
-                    preset = naughty.config.presets.critical,
-                    title = "电量警报",
-                    text = '电池电量只剩下 ' .. max_percent .. '% 了！',
-                }
-                last_bat_warning = t
-            end
-            if max_percent <= 10 and not dont_hibernate then
-                awful.util.spawn("systemctl hibernate")
-            end
-        end
-    end
-    local text = ' '
-    for i, v in ipairs(bats) do
-        local percent = v[2]
-        if percent <= 30 then
-            percent = '<span color="red">' .. percent .. '</span>'
-        end
-        text = text .. (battery_state[v[1]] or battery_state.Unknown) .. percent .. '%'
-               .. (v[3] ~= '' and (' ' .. v[3]) or '') .. '</span>'
-        if i ~= #bats then
-            text = text .. ' '
-        end
-    end
-    batwidget:set_markup(text)
-end
-batwidget = wibox.widget.textbox('↯??%')
-update_batwidget()
-bat_clock = timer({ timeout = 5 })
-bat_clock:connect_signal("timeout", update_batwidget)
-bat_clock:start()
+})
 -- }}}
+-- {{{ Coretemp
+tempicon = wibox.widget.imagebox(beautiful.widget_temp)
+tempwidget = lain.widgets.temp({
+    settings = function()
+        widget:set_markup(markup("#f1af5f", coretemp_now .. "°C "))
+    end
+})
+-- }}}
+
+----{{{ battery indicator, using the acpi command
+--local battery_state = {
+    ---- Unknown     = '<span color="yellow">? ',
+    --Unknown     = '<span color="#0000ff">↯',
+    --Idle        = '<span color="#0000ff">↯',
+    --Charging    = '<span color="green">+ ',
+    --Discharging = '<span color="#1e90ff">– ',
+--}
+--function update_batwidget()
+    --local pipe = io.popen('acpi')
+    --if not pipe then
+        --batwidget:set_markup('<span color="red">ERR</span>')
+        --return
+    --end
+
+--[>
+--Battery 0: Unknown, 97%
+--Battery 1: Unknown, 99%
+
+--Battery 0: Discharging, 97%, discharging at zero rate - will never fully discharge.
+--Battery 1: Unknown, 99%
+
+--Battery 0: Discharging, 96%, 02:25:51 remaining
+--Battery 1: Unknown, 99%
+--]]
+    --local bats = {}
+    --local max_percent = 0
+    --local max_percent_index = 0
+    --local index = 0
+    --for line in pipe:lines() do
+        --index = index + 1
+        --local state, percent, rest = line:match('^Battery %d+:%s+([^,]+), ([0-9.]+)%%(.*)')
+        --local t
+        --if rest ~= '' then
+            --t = rest:match('[1-9]*%d:%d+')
+        --end
+        --if not t then t = '' end
+        --percent = tonumber(percent)
+        --if percent > max_percent then
+            --max_percent = percent
+            --max_percent_index = index
+        --end
+        --table.insert(bats, {state, percent, t})
+    --end
+    --pipe:close()
+
+    --if index == 0 then
+        --batwidget:set_markup('<span color="red">ERR</span>')
+        --return
+    --end
+
+    --if max_percent <= 30 then
+        --if bats[max_percent_index][1] == 'Discharging' then
+            --local t = os.time()
+            --if t - last_bat_warning > 60 * 5 then
+                --naughty.notify{
+                    --preset = naughty.config.presets.critical,
+                    --title = "电量警报",
+                    --text = '电池电量只剩下 ' .. max_percent .. '% 了！',
+                --}
+                --last_bat_warning = t
+            --end
+            --if max_percent <= 10 and not dont_hibernate then
+                --awful.util.spawn("systemctl hibernate")
+            --end
+        --end
+    --end
+    --local text = ' '
+    --for i, v in ipairs(bats) do
+        --local percent = v[2]
+        --if percent <= 30 then
+            --percent = '<span color="red">' .. percent .. '</span>'
+        --end
+        --text = text .. (battery_state[v[1]] or battery_state.Unknown) .. percent .. '%'
+               --.. (v[3] ~= '' and (' ' .. v[3]) or '') .. '</span>'
+        --if i ~= #bats then
+            --text = text .. ' '
+        --end
+    --end
+    --batwidget:set_markup(text)
+--end
+--batwidget = wibox.widget.textbox('↯??%')
+--update_batwidget()
+--bat_clock = timer({ timeout = 5 })
+--bat_clock:connect_signal("timeout", update_batwidget)
+--bat_clock:start()
+---- }}}
 
 -- {{{ Volume Controller
 function volumectl (mode, widget)
@@ -569,9 +595,14 @@ for s = 1, screen.count() do
 
     -- Widgets that are aligned to the right
     local right_layout = wibox.layout.fixed.horizontal()
+    right_layout:add(memicon)
     right_layout:add(memwidget)
-    right_layout:add(cputempwidget)
-    right_layout:add(batwidget)
+    -- right_layout:add(cputempwidget)
+    right_layout:add(cpuicon)
+    right_layout:add(cpuwidget)
+    right_layout:add(tempicon)
+    right_layout:add(tempwidget)
+    --right_layout:add(batwidget)
     right_layout:add(netwidget)
     right_layout:add(volumewidget)
     if s == 1 then right_layout:add(wibox.widget.systray()) end
@@ -721,7 +752,7 @@ globalkeys = awful.util.table.join(
     awful.key({ modkey,           }, "Return",
         function ()
             -- Go and find a terminal for me
-            myutil.run_or_raise("xfce4-terminal --role=TempTerm --geometry=80x24+343+180", { role = "TempTerm" })
+            myutil.run_or_raise("gnome-terminal --role=TempTerm --geometry=80x24+343+180", { role = "TempTerm" })
         end),
     awful.key({ modkey, "Control" }, "r", awesome.restart),
     awful.key({ modkey, "Control" }, "q", awesome.quit),
@@ -857,7 +888,10 @@ globalkeys = awful.util.table.join(
     -- Volume
     awful.key({ }, 'XF86AudioRaiseVolume', function () volumectl("up", volumewidget) end),
     awful.key({ }, 'XF86AudioLowerVolume', function () volumectl("down", volumewidget) end),
-    awful.key({ }, 'XF86AudioMute', function () volumectl("mute", volumewidget) end)
+    awful.key({ }, 'XF86AudioMute', function () volumectl("mute", volumewidget) end),
+
+    -- lockscreen
+     awful.key({ modkey, "Control" }, "l", function () awful.util.spawn("xscreensaver-command -lock") end)
 ) -- }}}
 
 -- {{{ clientkeys

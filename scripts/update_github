@@ -22,7 +22,8 @@ logger.addHandler(logging.handlers.SysLogHandler(address='/dev/log'))
 logger.setLevel(logging.INFO)
 
 def github_contributed():
-  user = os.environ['USER']
+  #user = os.environ['USER']
+  user = 'lonelinsky'
   today = time.strftime('%Y-%m-%d')
   url = "https://github.com/users/%s/contributions" % user
   data = requests.get(url, timeout=30).text

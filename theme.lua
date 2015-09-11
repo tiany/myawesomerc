@@ -20,9 +20,9 @@ theme.fg_focus      = "#ffffff"
 theme.fg_urgent     = "#1e90ff"
 theme.fg_minimize   = "#ffffff"
 
-theme.border_width  = "2"
+theme.border_width  = 1
 theme.border_normal = "#000000"
-theme.border_focus  = "#1e90ff"
+theme.border_focus  = "#535d6c"
 theme.border_marked = "#91231c"
 
 -- There are other variable sets
@@ -93,6 +93,10 @@ theme.layout_dwindle = "/usr/share/awesome/themes/default/layouts/dwindlew.png"
 theme.layout_empathy = confdir .. "/image/layout_empathy.png"
 
 theme.awesome_icon = "/usr/share/awesome/icons/awesome16.png"
+
+theme.widget_temp                   = confdir .. "/icons/temp.png"
+theme.widget_cpu                    = confdir .. "/icons/cpu.png"
+theme.widget_mem                    = confdir .. "/icons/mem.png"
 
 -- Define the icon theme for application icons. If not set then the icons 
 -- from /usr/share/icons and /usr/share/icons/hicolor will be used.
